@@ -1,0 +1,2755 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Foco & Clareza — Painel Pessoal</title>
+  <style>
+    /* =========================================================
+       VARIÁVEIS GLOBAIS & RESET
+    ========================================================= */
+    :root {
+      --bg:          #0d0f14;
+      --surface:     #141720;
+      --surface2:    #1c2030;
+      --border:      #252a3a;
+      --accent:      #4f8ef7;
+      --accent2:     #7b61ff;
+      --accent3:     #3ecfb2;
+      --text:        #d8dce8;
+      --text-muted:  #6b7390;
+      --text-dim:    #9aa0b8;
+      --danger:      #e05c5c;
+      --success:     #3ecfb2;
+      --warn:        #f0a94a;
+      --radius:      12px;
+      --radius-sm:   8px;
+      --gap:         20px;
+      --font-body:   'Georgia', 'Cambria', serif;
+      --font-ui:     'Trebuchet MS', 'Segoe UI', sans-serif;
+      --transition:  0.25s ease;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { font-size: 17px; scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      line-height: 1.7;
+      letter-spacing: 0.02em;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* =========================================================
+       TIPOGRAFIA
+    ========================================================= */
+    h1, h2, h3, h4 {
+      font-family: var(--font-ui);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      line-height: 1.3;
+    }
+    h1 { font-size: 1.6rem; }
+    h2 { font-size: 1.2rem; color: var(--text-dim); }
+    h3 { font-size: 1.05rem; }
+
+    p { max-width: 65ch; }
+
+    /* =========================================================
+       LAYOUT PRINCIPAL
+    ========================================================= */
+    #app {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      grid-template-rows: auto 1fr;
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    #header {
+      grid-column: 1 / -1;
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .logo-text {
+      font-family: var(--font-ui);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 0.06em;
+    }
+
+    .logo-text span { color: var(--accent); }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    /* SIDEBAR */
+    #sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      overflow-y: auto;
+      transition: transform var(--transition);
+    }
+
+    .nav-section-label {
+      padding: 16px 20px 6px;
+      font-size: 0.65rem;
+      font-family: var(--font-ui);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 20px;
+      border: none;
+      background: transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-family: var(--font-ui);
+      font-size: 0.88rem;
+      letter-spacing: 0.03em;
+      transition: all var(--transition);
+      border-left: 3px solid transparent;
+      width: 100%;
+      text-align: left;
+    }
+
+    .nav-btn:hover {
+      background: var(--surface2);
+      color: var(--text);
+      border-left-color: var(--border);
+    }
+
+    .nav-btn.active {
+      background: var(--surface2);
+      color: var(--accent);
+      border-left-color: var(--accent);
+    }
+
+    .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+
+    /* MAIN CONTENT */
+    #main {
+      padding: 28px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap);
+    }
+
+    /* =========================================================
+       COMPONENTS BÁSICOS
+    ========================================================= */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-ui);
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .card-title .icon { font-size: 1rem; }
+
+    /* BOTÕES */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 18px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface2);
+      color: var(--text);
+      cursor: pointer;
+      font-family: var(--font-ui);
+      font-size: 0.85rem;
+      letter-spacing: 0.03em;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      background: var(--border);
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #3a7de8;
+      border-color: #3a7de8;
+    }
+
+    .btn-success {
+      background: var(--success);
+      border-color: var(--success);
+      color: #0d1a17;
+    }
+
+    .btn-danger {
+      background: transparent;
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.78rem;
+    }
+
+    .btn-icon {
+      padding: 8px;
+      border-radius: var(--radius-sm);
+    }
+
+    /* INPUTS */
+    input[type="text"],
+    input[type="number"],
+    textarea,
+    select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      padding: 9px 14px;
+      width: 100%;
+      transition: border-color var(--transition);
+      outline: none;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--accent);
+    }
+
+    textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+
+    select option { background: var(--surface2); }
+
+    /* RANGE SLIDER */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      outline: none;
+      padding: 0;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+    }
+
+    /* GRID UTILITÁRIOS */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); }
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .gap-8 { gap: 8px; }
+    .gap-12 { gap: 12px; }
+    .gap-16 { gap: 16px; }
+    .gap-20 { gap: 20px; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .w-full { width: 100%; }
+    .mt-8 { margin-top: 8px; }
+    .mt-12 { margin-top: 12px; }
+    .mt-16 { margin-top: 16px; }
+    .mb-8 { margin-bottom: 8px; }
+    .mb-12 { margin-bottom: 12px; }
+    .text-muted { color: var(--text-muted); font-size: 0.85rem; }
+    .text-accent { color: var(--accent); }
+    .text-success { color: var(--success); }
+    .text-warn { color: var(--warn); }
+    .text-danger { color: var(--danger); }
+    .text-center { text-align: center; }
+    .hidden { display: none !important; }
+
+    /* TAGS / BADGES */
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: 0.72rem;
+      font-family: var(--font-ui);
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    .badge-easy    { background: #1a2e24; color: #3ecfb2; border: 1px solid #2a4a38; }
+    .badge-medium  { background: #2e2510; color: #f0a94a; border: 1px solid #4a3818; }
+    .badge-hard    { background: #2e1515; color: #e05c5c; border: 1px solid #4a2222; }
+    .badge-custom  { background: #1a1f35; color: #7b61ff; border: 1px solid #2a2f55; }
+
+    /* PROGRESS BAR */
+    .progress-track {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width 0.4s ease;
+    }
+
+    /* DIVIDER */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 16px 0;
+    }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--surface2);
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-family: var(--font-ui);
+      font-size: 0.82rem;
+      border-radius: 6px;
+      transition: all var(--transition);
+      letter-spacing: 0.03em;
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .tab-btn:hover:not(.active) {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    /* =========================================================
+       SEÇÕES / VIEWS
+    ========================================================= */
+    .view { display: none; flex-direction: column; gap: var(--gap); }
+    .view.active { display: flex; }
+
+    /* =========================================================
+       TIMER POMODORO
+    ========================================================= */
+    .timer-display {
+      text-align: center;
+      padding: 36px 0;
+    }
+
+    .timer-ring-container {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      margin: 0 auto 24px;
+    }
+
+    .timer-ring-svg {
+      transform: rotate(-90deg);
+      width: 220px;
+      height: 220px;
+    }
+
+    .timer-ring-bg {
+      fill: none;
+      stroke: var(--border);
+      stroke-width: 8;
+    }
+
+    .timer-ring-progress {
+      fill: none;
+      stroke: url(#timerGrad);
+      stroke-width: 8;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.5s ease;
+    }
+
+    .timer-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .timer-time {
+      font-size: 2.8rem;
+      font-family: var(--font-ui);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .timer-label {
+      font-size: 0.72rem;
+      font-family: var(--font-ui);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .timer-controls {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .timer-btn-main {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-size: 1.3rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition);
+      box-shadow: 0 0 20px rgba(79, 142, 247, 0.3);
+    }
+
+    .timer-btn-main:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 28px rgba(79, 142, 247, 0.5);
+    }
+
+    .timer-settings-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .timer-setting-block {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      text-align: center;
+    }
+
+    .timer-setting-label {
+      font-size: 0.7rem;
+      font-family: var(--font-ui);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .timer-setting-val {
+      font-family: var(--font-ui);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .timer-setting-controls {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .timer-adj-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      transition: all var(--transition);
+    }
+
+    .timer-adj-btn:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .session-counter {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-top: 12px;
+    }
+
+    .session-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 1px solid var(--text-muted);
+      background: transparent;
+      transition: all 0.3s;
+    }
+
+    .session-dot.done { background: var(--accent); border-color: var(--accent); }
+
+    /* Task do timer */
+    .timer-task-input {
+      margin-top: 16px;
+      display: flex;
+      gap: 10px;
+    }
+
+    /* =========================================================
+       SONS
+    ========================================================= */
+    .sounds-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+    }
+
+    .sound-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sound-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .sound-card.playing {
+      border-color: var(--accent3);
+      background: rgba(62, 207, 178, 0.07);
+    }
+
+    .sound-card.playing::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius-sm);
+      box-shadow: inset 0 0 0 1px var(--accent3);
+      animation: pulse-border 2s infinite;
+    }
+
+    @keyframes pulse-border {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .sound-icon { font-size: 1.8rem; margin-bottom: 8px; }
+    .sound-name { font-size: 0.8rem; font-family: var(--font-ui); color: var(--text-dim); letter-spacing: 0.03em; }
+    .sound-status { font-size: 0.68rem; color: var(--accent3); margin-top: 4px; min-height: 14px; }
+
+    .volume-control {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+    }
+
+    .volume-label {
+      font-size: 0.78rem;
+      font-family: var(--font-ui);
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    /* Equalizer bars animados */
+    .eq-bars {
+      display: flex;
+      gap: 2px;
+      align-items: flex-end;
+      height: 16px;
+    }
+
+    .eq-bar {
+      width: 3px;
+      background: var(--accent3);
+      border-radius: 1px;
+      animation: eq-anim 0.8s ease-in-out infinite alternate;
+    }
+
+    .eq-bar:nth-child(1) { animation-delay: 0s;    height: 6px; }
+    .eq-bar:nth-child(2) { animation-delay: 0.1s;  height: 12px; }
+    .eq-bar:nth-child(3) { animation-delay: 0.2s;  height: 8px; }
+    .eq-bar:nth-child(4) { animation-delay: 0.15s; height: 14px; }
+    .eq-bar:nth-child(5) { animation-delay: 0.05s; height: 5px; }
+
+    @keyframes eq-anim {
+      from { transform: scaleY(0.3); }
+      to   { transform: scaleY(1); }
+    }
+
+    /* =========================================================
+       DESAFIOS
+    ========================================================= */
+    .challenge-filter-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .challenge-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .challenge-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      cursor: pointer;
+      transition: all var(--transition);
+      position: relative;
+    }
+
+    .challenge-item:hover {
+      border-color: var(--accent);
+      transform: translateX(3px);
+    }
+
+    .challenge-item.completed {
+      opacity: 0.55;
+      border-color: transparent;
+    }
+
+    .challenge-item.active-challenge {
+      border-color: var(--accent2);
+      background: rgba(123, 97, 255, 0.06);
+    }
+
+    .challenge-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .challenge-title {
+      font-family: var(--font-ui);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .challenge-meta {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .challenge-desc {
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .challenge-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .challenge-tag {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 2px 10px;
+      font-size: 0.7rem;
+      font-family: var(--font-ui);
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+    }
+
+    /* Challenge Detail */
+    .challenge-detail {
+      background: var(--surface);
+      border: 1px solid var(--accent2);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-top: 8px;
+      animation: slideDown 0.25s ease;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .challenge-timer-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      margin: 16px 0;
+    }
+
+    .challenge-timer-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--accent3), var(--accent));
+      transition: width 1s linear;
+    }
+
+    .challenge-answer-area {
+      margin-top: 16px;
+    }
+
+    .challenge-diagram {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      margin: 16px 0;
+      overflow-x: auto;
+    }
+
+    /* =========================================================
+       MOTIVAÇÃO
+    ========================================================= */
+    .quote-display {
+      padding: 36px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .quote-display::before {
+      content: '"';
+      position: absolute;
+      top: -10px;
+      left: 20px;
+      font-size: 8rem;
+      color: var(--border);
+      font-family: Georgia, serif;
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .quote-text {
+      font-size: 1.15rem;
+      line-height: 1.8;
+      color: var(--text);
+      font-style: italic;
+      position: relative;
+      max-width: 60ch;
+      margin: 0 auto 16px;
+    }
+
+    .quote-author {
+      font-size: 0.82rem;
+      font-family: var(--font-ui);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    /* =========================================================
+       AUTO-DESAFIOS
+    ========================================================= */
+    .custom-challenge-form {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 0.8rem;
+      font-family: var(--font-ui);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .custom-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 420px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .custom-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .custom-item-body { flex: 1; }
+    .custom-item-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 4px; }
+    .custom-item-desc { font-size: 0.83rem; color: var(--text-dim); }
+
+    /* =========================================================
+       MODO FOCO
+    ========================================================= */
+    #focus-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 500;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+    }
+
+    #focus-overlay.active { display: flex; }
+
+    .focus-message {
+      text-align: center;
+      max-width: 460px;
+    }
+
+    .focus-task-display {
+      font-size: 1.3rem;
+      line-height: 1.6;
+      color: var(--text);
+      margin-top: 12px;
+    }
+
+    .focus-exit-hint {
+      font-size: 0.78rem;
+      font-family: var(--font-ui);
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      margin-top: 40px;
+    }
+
+    /* =========================================================
+       DIAGRAMA SVG
+    ========================================================= */
+    .diagram-svg {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      display: block;
+    }
+
+    .diagram-svg text {
+      font-family: var(--font-ui);
+      fill: var(--text-dim);
+    }
+
+    /* =========================================================
+       TOAST
+    ========================================================= */
+    #toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 9999;
+    }
+
+    .toast {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 18px;
+      font-size: 0.87rem;
+      font-family: var(--font-ui);
+      color: var(--text);
+      max-width: 320px;
+      animation: toastIn 0.3s ease forwards;
+      border-left: 3px solid var(--accent);
+    }
+
+    .toast.success { border-left-color: var(--success); }
+    .toast.warn    { border-left-color: var(--warn); }
+    .toast.danger  { border-left-color: var(--danger); }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* =========================================================
+       RESPONSIVO
+    ========================================================= */
+    @media (max-width: 768px) {
+      #app {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto 1fr;
+      }
+
+      #sidebar {
+        display: none;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 12px;
+        gap: 6px;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+
+      #sidebar.open { display: flex; }
+
+      .nav-section-label { display: none; }
+
+      .nav-btn {
+        flex: 1;
+        min-width: 80px;
+        padding: 8px 10px;
+        border-left: none;
+        border-bottom: 2px solid transparent;
+        text-align: center;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 0.72rem;
+      }
+
+      .nav-btn.active { border-left: none; border-bottom-color: var(--accent); }
+
+      #main { padding: 16px; }
+
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+
+      .timer-settings-grid { grid-template-columns: repeat(3, 1fr); }
+
+      .sounds-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    /* =========================================================
+       SCROLLBAR CUSTOMIZADA
+    ========================================================= */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    /* =========================================================
+       ESTATÍSTICAS
+    ========================================================= */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+    }
+
+    .stat-block {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat-val {
+      font-size: 1.8rem;
+      font-family: var(--font-ui);
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .stat-label {
+      font-size: 0.72rem;
+      font-family: var(--font-ui);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    /* Toggle focus mode btn */
+    .focus-mode-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      display: inline-block;
+      margin-right: 6px;
+    }
+
+    .focus-mode-indicator.on {
+      background: var(--accent3);
+      box-shadow: 0 0 6px var(--accent3);
+      animation: blink 2s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===================== ESTRUTURA DO APP ===================== -->
+<div id="app">
+
+  <!-- HEADER -->
+  <header id="header">
+    <div class="logo">
+      <div class="logo-icon">🧠</div>
+      <span class="logo-text">Foco<span>&amp;</span>Clareza</span>
+    </div>
+    <div class="header-actions">
+      <span id="focus-indicator" class="focus-mode-indicator"></span>
+      <button class="btn btn-sm" id="btn-toggle-focus-mode" title="Modo Foco">
+        ◎ Modo Foco
+      </button>
+      <button class="btn btn-sm btn-icon" id="btn-menu-mobile" title="Menu" style="display:none;">☰</button>
+    </div>
+  </header>
+
+  <!-- SIDEBAR -->
+  <nav id="sidebar">
+    <span class="nav-section-label">Ferramentas</span>
+    <button class="nav-btn active" data-view="view-timer">
+      <span class="nav-icon">⏱</span> Timer Pomodoro
+    </button>
+    <button class="nav-btn" data-view="view-sounds">
+      <span class="nav-icon">🎵</span> Sons Ambientes
+    </button>
+    <span class="nav-section-label">Desafios</span>
+    <button class="nav-btn" data-view="view-challenges">
+      <span class="nav-icon">🎯</span> Desafios
+    </button>
+    <button class="nav-btn" data-view="view-custom">
+      <span class="nav-icon">✏️</span> Meus Desafios
+    </button>
+    <span class="nav-section-label">Apoio</span>
+    <button class="nav-btn" data-view="view-motivation">
+      <span class="nav-icon">💬</span> Motivação
+    </button>
+    <button class="nav-btn" data-view="view-stats">
+      <span class="nav-icon">📊</span> Estatísticas
+    </button>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main id="main">
+
+    <!-- ============================================================
+         VIEW: TIMER POMODORO
+    ============================================================ -->
+    <section class="view active" id="view-timer">
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="icon">⏱</span> Temporizador Pomodoro</span>
+          <span class="badge" id="timer-mode-badge">FOCO</span>
+        </div>
+
+        <div class="timer-display">
+          <!-- SVG Ring -->
+          <div class="timer-ring-container">
+            <svg class="timer-ring-svg" viewBox="0 0 220 220">
+              <defs>
+                <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%"   stop-color="#4f8ef7"/>
+                  <stop offset="100%" stop-color="#7b61ff"/>
+                </linearGradient>
+              </defs>
+              <circle class="timer-ring-bg" cx="110" cy="110" r="100"/>
+              <circle class="timer-ring-progress" id="timer-ring-progress"
+                cx="110" cy="110" r="100"
+                stroke-dasharray="628.318"
+                stroke-dashoffset="0"/>
+            </svg>
+            <div class="timer-center">
+              <div class="timer-time" id="timer-display">25:00</div>
+              <div class="timer-label" id="timer-phase-label">CONCENTRAÇÃO</div>
+            </div>
+          </div>
+
+          <!-- Controles -->
+          <div class="timer-controls">
+            <button class="btn btn-icon" id="btn-timer-reset" title="Reiniciar">⟳</button>
+            <button class="timer-btn-main" id="btn-timer-start" title="Iniciar / Pausar">▶</button>
+            <button class="btn btn-icon" id="btn-timer-skip" title="Pular fase">⟶</button>
+          </div>
+
+          <!-- Sessões -->
+          <div class="session-counter" id="session-dots"></div>
+        </div>
+
+        <!-- Tarefa atual -->
+        <div class="divider"></div>
+        <div>
+          <div class="form-label mb-8">Tarefa atual (opcional)</div>
+          <div class="timer-task-input">
+            <input type="text" id="timer-task" placeholder="Descreva a tarefa desta sessão…" />
+          </div>
+        </div>
+
+        <!-- Configurações -->
+        <div class="divider"></div>
+        <div class="card-title mb-12"><span class="icon">⚙️</span> Configurações de Duração</div>
+        <div class="timer-settings-grid">
+          <div class="timer-setting-block">
+            <div class="timer-setting-label">Foco (min)</div>
+            <div class="timer-setting-val" id="cfg-focus-val">25</div>
+            <div class="timer-setting-controls">
+              <button class="timer-adj-btn" data-cfg="focus" data-dir="-1">−</button>
+              <button class="timer-adj-btn" data-cfg="focus" data-dir="1">+</button>
+            </div>
+          </div>
+          <div class="timer-setting-block">
+            <div class="timer-setting-label">Pausa curta (min)</div>
+            <div class="timer-setting-val" id="cfg-short-val">5</div>
+            <div class="timer-setting-controls">
+              <button class="timer-adj-btn" data-cfg="short" data-dir="-1">−</button>
+              <button class="timer-adj-btn" data-cfg="short" data-dir="1">+</button>
+            </div>
+          </div>
+          <div class="timer-setting-block">
+            <div class="timer-setting-label">Pausa longa (min)</div>
+            <div class="timer-setting-val" id="cfg-long-val">15</div>
+            <div class="timer-setting-controls">
+              <button class="timer-adj-btn" data-cfg="long" data-dir="-1">−</button>
+              <button class="timer-adj-btn" data-cfg="long" data-dir="1">+</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Dica de método -->
+      <div class="card" style="border-color: rgba(79,142,247,0.2); background: rgba(79,142,247,0.04);">
+        <p style="font-size:0.88rem; color: var(--text-dim); line-height: 1.7;">
+          <strong style="color:var(--accent);">Método Pomodoro:</strong>
+          Trabalhe em blocos de concentração intensa, separados por pausas estruturadas.
+          A cada quatro ciclos de foco, faça uma pausa longa para consolidar o aprendizado e restaurar a atenção.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         VIEW: SONS AMBIENTES
+    ============================================================ -->
+    <section class="view" id="view-sounds">
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="icon">🎵</span> Sons Ambientes</span>
+          <div class="flex items-center gap-8" id="eq-display" style="display:none!important;">
+            <div class="eq-bars">
+              <div class="eq-bar"></div>
+              <div class="eq-bar"></div>
+              <div class="eq-bar"></div>
+              <div class="eq-bar"></div>
+              <div class="eq-bar"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Volume Master -->
+        <div class="volume-control mb-12">
+          <span class="volume-label">🔊 Volume</span>
+          <input type="range" id="master-volume" min="0" max="100" value="50" />
+          <span class="volume-label" id="vol-pct">50%</span>
+        </div>
+
+        <div class="sounds-grid" id="sounds-grid"></div>
+
+        <div class="divider"></div>
+        <p class="text-muted" style="font-size:0.82rem; line-height:1.6;">
+          Os sons são sintetizados localmente via Web Audio API — nenhum arquivo externo é necessário.
+          Sons binaurais e theta requerem fones de ouvido para pleno efeito de estimulação cerebral.
+        </p>
+      </div>
+
+    </section>
+
+    <!-- ============================================================
+         VIEW: DESAFIOS
+    ============================================================ -->
+    <section class="view" id="view-challenges">
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="icon">🎯</span> Desafios Cognitivos</span>
+          <span class="text-muted" id="challenge-count-label"></span>
+        </div>
+
+        <!-- Filtros -->
+        <div class="challenge-filter-bar mb-12">
+          <div class="tabs" style="flex:1; max-width:340px;">
+            <button class="tab-btn active" data-filter="all">Todos</button>
+            <button class="tab-btn" data-filter="easy">Fácil</button>
+            <button class="tab-btn" data-filter="medium">Moderado</button>
+            <button class="tab-btn" data-filter="hard">Difícil</button>
+          </div>
+          <button class="btn btn-sm" id="btn-reset-challenges">Reiniciar progresso</button>
+        </div>
+
+        <!-- Progress geral -->
+        <div class="flex items-center gap-12 mb-12" style="gap:12px;">
+          <span class="text-muted" style="white-space:nowrap; font-size:0.82rem;">Concluídos</span>
+          <div class="progress-track w-full"><div class="progress-fill" id="global-progress" style="width:0%"></div></div>
+          <span class="text-muted" id="global-progress-label" style="white-space:nowrap; font-size:0.82rem;">0 / 0</span>
+        </div>
+
+        <!-- Lista -->
+        <div class="challenge-list" id="challenge-list"></div>
+
+      </div>
+
+      <!-- Challenge Detail -->
+      <div id="challenge-detail-panel" class="hidden"></div>
+
+    </section>
+
+    <!-- ============================================================
+         VIEW: MEUS DESAFIOS
+    ============================================================ -->
+    <section class="view" id="view-custom">
+
+      <div class="grid-2" style="align-items: start;">
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title"><span class="icon">✏️</span> Novo Auto-Desafio</span>
+          </div>
+          <div class="custom-challenge-form">
+            <div class="form-group">
+              <label class="form-label">Título do desafio</label>
+              <input type="text" id="cc-title" placeholder="Ex: Escrever e-mail de reunião" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Descrição / Contexto</label>
+              <textarea id="cc-desc" placeholder="Descreva o que precisa ser feito, qual a dificuldade, o que você quer praticar…"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nível</label>
+              <select id="cc-level">
+                <option value="easy">Fácil</option>
+                <option value="medium">Moderado</option>
+                <option value="hard">Difícil</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tempo estimado (minutos)</label>
+              <input type="number" id="cc-time" min="1" max="120" value="15" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Área cognitiva</label>
+              <select id="cc-area">
+                <option value="Função Executiva">Função Executiva</option>
+                <option value="Linguagem">Linguagem</option>
+                <option value="Lógica">Lógica</option>
+                <option value="Planejamento">Planejamento</option>
+                <option value="Análise Crítica">Análise Crítica</option>
+                <option value="Organização">Organização</option>
+                <option value="Memória de Trabalho">Memória de Trabalho</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" id="btn-save-custom">💾 Salvar Auto-Desafio</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title"><span class="icon">📋</span> Meus Desafios Salvos</span>
+            <span class="text-muted" id="custom-count">0 itens</span>
+          </div>
+          <div class="custom-list" id="custom-list">
+            <p class="text-muted text-center" style="padding:24px;">Nenhum auto-desafio criado ainda.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================
+         VIEW: MOTIVAÇÃO
+    ============================================================ -->
+    <section class="view" id="view-motivation">
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="icon">💬</span> Frase do Momento</span>
+          <button class="btn btn-sm" id="btn-new-quote">Nova frase</button>
+        </div>
+        <div class="quote-display" id="quote-display">
+          <div class="quote-text" id="quote-text"></div>
+          <div class="quote-author" id="quote-author"></div>
+        </div>
+      </div>
+
+      <!-- Lista de todas as frases -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="icon">📜</span> Todas as Frases</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px; max-height:480px; overflow-y:auto; padding-right:4px;" id="all-quotes-list"></div>
+      </div>
+
+    </section>
+
+    <!-- ============================================================
+         VIEW: ESTATÍSTICAS
+    ============================================================ -->
+    <section class="view" id="view-stats">
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="icon">📊</span> Seu Progresso</span>
+          <button class="btn btn-sm btn-danger" id="btn-reset-stats">Zerar estatísticas</button>
+        </div>
+        <div class="stat-grid" id="stats-grid"></div>
+      </div>
+
+      <!-- Diagrama Ciclo Pomodoro -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="icon">📈</span> Diagrama de Foco — Ciclo Pomodoro</span>
+        </div>
+        <div class="challenge-diagram">
+          <svg class="diagram-svg" viewBox="0 0 580 220" xmlns="http://www.w3.org/2000/svg">
+            <rect x="20" y="80" width="100" height="50" rx="10" fill="#1c2030" stroke="#4f8ef7" stroke-width="1.5"/>
+            <text x="70" y="100" text-anchor="middle" font-size="11" fill="#4f8ef7">FOCO</text>
+            <text x="70" y="115" text-anchor="middle" font-size="10" fill="#6b7390">25 min</text>
+            <rect x="180" y="20" width="110" height="50" rx="10" fill="#1c2030" stroke="#3ecfb2" stroke-width="1.5"/>
+            <text x="235" y="40" text-anchor="middle" font-size="11" fill="#3ecfb2">PAUSA CURTA</text>
+            <text x="235" y="55" text-anchor="middle" font-size="10" fill="#6b7390">5 min</text>
+            <rect x="180" y="140" width="110" height="50" rx="10" fill="#1c2030" stroke="#f0a94a" stroke-width="1.5"/>
+            <text x="235" y="160" text-anchor="middle" font-size="11" fill="#f0a94a">PAUSA LONGA</text>
+            <text x="235" y="175" text-anchor="middle" font-size="10" fill="#6b7390">15 min</text>
+            <rect x="360" y="80" width="120" height="50" rx="10" fill="#1c2030" stroke="#7b61ff" stroke-width="1.5"/>
+            <text x="420" y="100" text-anchor="middle" font-size="11" fill="#7b61ff">CICLO</text>
+            <text x="420" y="115" text-anchor="middle" font-size="10" fill="#6b7390">4 pomodoros</text>
+            <line x1="120" y1="95" x2="178" y2="50" stroke="#4f8ef7" stroke-width="1.2" marker-end="url(#arrow)"/>
+            <text x="140" y="72" font-size="9" fill="#6b7390">1–3x</text>
+            <line x1="120" y1="115" x2="178" y2="155" stroke="#4f8ef7" stroke-width="1.2" marker-end="url(#arrow)"/>
+            <text x="130" y="148" font-size="9" fill="#6b7390">4ª vez</text>
+            <line x1="290" y1="50" x2="358" y2="95" stroke="#3ecfb2" stroke-width="1.2" marker-end="url(#arrow)"/>
+            <line x1="290" y1="165" x2="358" y2="115" stroke="#f0a94a" stroke-width="1.2" marker-end="url(#arrow)"/>
+            <path d="M 290 45 Q 330 10 340 80" fill="none" stroke="#3ecfb2" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+            <text x="308" y="22" font-size="9" fill="#6b7390">reinicia</text>
+            <defs>
+              <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L6,3 z" fill="#6b7390"/>
+              </marker>
+            </defs>
+          </svg>
+        </div>
+        <p class="text-muted" style="font-size:0.82rem; margin-top:12px; line-height:1.6;">
+          Após quatro ciclos de foco com pausas curtas, o quarto intervalo é uma pausa longa.
+          Este ritmo respeita os ciclos naturais de atenção e consolida o aprendizado.
+        </p>
+      </div>
+
+      <!-- Diagrama Funções Cognitivas -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="icon">🧠</span> Mapa — Funções Cognitivas Treinadas</span>
+        </div>
+        <div class="challenge-diagram">
+          <svg class="diagram-svg" viewBox="0 0 560 260" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="280" cy="130" r="42" fill="#1c2030" stroke="#7b61ff" stroke-width="2"/>
+            <text x="280" y="125" text-anchor="middle" font-size="11" fill="#7b61ff">Função</text>
+            <text x="280" y="140" text-anchor="middle" font-size="11" fill="#7b61ff">Executiva</text>
+            <ellipse cx="90" cy="60"  rx="60" ry="24" fill="#1a1f2e" stroke="#4f8ef7" stroke-width="1.2"/>
+            <text x="90"  y="64"  text-anchor="middle" font-size="10" fill="#4f8ef7">Planejamento</text>
+            <ellipse cx="90" cy="200" rx="60" ry="24" fill="#1a1f2e" stroke="#3ecfb2" stroke-width="1.2"/>
+            <text x="90"  y="204" text-anchor="middle" font-size="10" fill="#3ecfb2">Organização</text>
+            <ellipse cx="280" cy="30"  rx="60" ry="22" fill="#1a1f2e" stroke="#f0a94a" stroke-width="1.2"/>
+            <text x="280" y="34"  text-anchor="middle" font-size="10" fill="#f0a94a">Lógica</text>
+            <ellipse cx="280" cy="230" rx="60" ry="22" fill="#1a1f2e" stroke="#e05c5c" stroke-width="1.2"/>
+            <text x="280" y="234" text-anchor="middle" font-size="10" fill="#e05c5c">Análise Crítica</text>
+            <ellipse cx="470" cy="60"  rx="60" ry="24" fill="#1a1f2e" stroke="#9b8aff" stroke-width="1.2"/>
+            <text x="470" y="64"  text-anchor="middle" font-size="10" fill="#9b8aff">Linguagem</text>
+            <ellipse cx="470" cy="200" rx="60" ry="24" fill="#1a1f2e" stroke="#4f8ef7" stroke-width="1.2"/>
+            <text x="470" y="204" text-anchor="middle" font-size="10" fill="#4f8ef7">Mem. Trabalho</text>
+            <line x1="148" y1="72"  x2="242" y2="100" stroke="#4f8ef7" stroke-width="1" stroke-dasharray="3,3"/>
+            <line x1="148" y1="190" x2="242" y2="158" stroke="#3ecfb2" stroke-width="1" stroke-dasharray="3,3"/>
+            <line x1="280" y1="52"  x2="280" y2="88"  stroke="#f0a94a" stroke-width="1" stroke-dasharray="3,3"/>
+            <line x1="280" y1="208" x2="280" y2="172" stroke="#e05c5c" stroke-width="1" stroke-dasharray="3,3"/>
+            <line x1="412" y1="72"  x2="318" y2="100" stroke="#9b8aff" stroke-width="1" stroke-dasharray="3,3"/>
+            <line x1="412" y1="190" x2="318" y2="158" stroke="#4f8ef7" stroke-width="1" stroke-dasharray="3,3"/>
+          </svg>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+<!-- ============================================================
+     MODO FOCO OVERLAY
+============================================================ -->
+<div id="focus-overlay">
+  <div class="timer-ring-container">
+    <svg class="timer-ring-svg" viewBox="0 0 220 220">
+      <defs>
+        <linearGradient id="timerGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%"   stop-color="#4f8ef7"/>
+          <stop offset="100%" stop-color="#7b61ff"/>
+        </linearGradient>
+      </defs>
+      <circle class="timer-ring-bg" cx="110" cy="110" r="100"/>
+      <circle class="timer-ring-progress" id="focus-ring-progress"
+        cx="110" cy="110" r="100"
+        stroke-dasharray="628.318" stroke-dashoffset="0"
+        stroke="url(#timerGrad2)"/>
+    </svg>
+    <div class="timer-center">
+      <div class="timer-time" id="focus-overlay-time">25:00</div>
+      <div class="timer-label" id="focus-overlay-phase">CONCENTRAÇÃO</div>
+    </div>
+  </div>
+
+  <div class="focus-message">
+    <div class="quote-text" id="focus-task-display" style="font-size:1.1rem; font-style:normal;"></div>
+  </div>
+
+  <button class="btn btn-primary" id="btn-exit-focus">Sair do Modo Foco</button>
+  <div class="focus-exit-hint">ESC para sair rapidamente</div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<!-- ============================================================
+     JAVASCRIPT
+============================================================ -->
+<script>
+/* ============================================================
+   DADOS: FRASES MOTIVACIONAIS (52 frases)
+============================================================ */
+const QUOTES = [
+  { text: "A disciplina é a ponte entre objetivos e conquistas.", author: "Jim Rohn" },
+  { text: "O progresso exige disposição para ser iniciante repetidas vezes.", author: "Anônimo" },
+  { text: "Não meça seu valor pelo tempo que levou para concluir algo, mas pela consistência com que persiste.", author: "Adaptado" },
+  { text: "A inteligência não é a velocidade do pensamento, mas a qualidade das conexões que você cria.", author: "Anônimo" },
+  { text: "Cada tarefa concluída é uma prova de que você é capaz — guarde essa evidência.", author: "Anônimo" },
+  { text: "O sucesso é a soma de pequenos esforços repetidos dia após dia.", author: "Robert Collier" },
+  { text: "Clareza mental não é ausência de dificuldade — é a capacidade de seguir em frente apesar dela.", author: "Anônimo" },
+  { text: "Concentre-se no processo. Os resultados são consequência da qualidade da sua atenção.", author: "Anônimo" },
+  { text: "Ter um cérebro que funciona de modo diferente não é um defeito — é uma perspectiva que o mundo precisa.", author: "Anônimo" },
+  { text: "Você não precisa ser rápido. Você precisa ser consistente.", author: "Anônimo" },
+  { text: "A perseverança é a virtude que torna todas as outras possíveis.", author: "Winston Churchill" },
+  { text: "Adaptar estratégias é inteligência, não fraqueza.", author: "Anônimo" },
+  { text: "Seu ritmo não é lentidão — é profundidade.", author: "Anônimo" },
+  { text: "Mentes que processam de forma única produzem soluções que mentes convencionais jamais alcançariam.", author: "Anônimo" },
+  { text: "A autoconsciência é a primeira forma de inteligência executiva.", author: "Anônimo" },
+  { text: "Estrutura não é prisão — é o andaime que permite construir alto.", author: "Anônimo" },
+  { text: "Errar é parte do processamento. O que distingue é a disposição de tentar novamente.", author: "Anônimo" },
+  { text: "Você não precisa que o mundo mude para prosperar. Você precisa de ferramentas adequadas para navegar nele.", author: "Anônimo" },
+  { text: "A dificuldade de hoje é a competência de amanhã.", author: "Anônimo" },
+  { text: "Conhecer seus limites é o primeiro passo para transcendê-los.", author: "Anônimo" },
+  { text: "O valor de um trabalho não está na facilidade com que foi feito, mas na seriedade com que foi conduzido.", author: "Anônimo" },
+  { text: "Pausas são parte do trabalho, não interrupções dele.", author: "Anônimo" },
+  { text: "Cada mente tem sua própria arquitetura. A sua é válida.", author: "Anônimo" },
+  { text: "Foco não é ausência de distração — é a habilidade de retornar ao que importa.", author: "Anônimo" },
+  { text: "A repetição com intenção é a forma mais profunda de aprendizado.", author: "Anônimo" },
+  { text: "Não compare sua trajetória com a de outros. Você está correndo em uma pista diferente.", author: "Anônimo" },
+  { text: "A consistência mediana supera o brilhantismo esporádico.", author: "Anônimo" },
+  { text: "O que você considera uma limitação pode ser exatamente o que gera sua diferenciação.", author: "Anônimo" },
+  { text: "Fazer uma coisa bem feita é melhor do que fazer dez coisas pela metade.", author: "Anônimo" },
+  { text: "A dislexia me ensinou que existem múltiplas formas de chegar à mesma resposta.", author: "Anônimo" },
+  { text: "Inteligência é a capacidade de resolver problemas. Existem infinitas maneiras de fazê-lo.", author: "Anônimo" },
+  { text: "O que parece demorar mais de aprender, com frequência, é retido com mais profundidade.", author: "Anônimo" },
+  { text: "Organize seu ambiente para servir à sua mente, não o contrário.", author: "Anônimo" },
+  { text: "Clareza de propósito transforma tarefas em atos significativos.", author: "Anônimo" },
+  { text: "Trabalhar com suas especificidades é mais eficiente do que lutar contra elas.", author: "Anônimo" },
+  { text: "A atenção é o recurso mais escasso e mais valioso do século XXI.", author: "Adaptado" },
+  { text: "Um ambiente sem distrações é um ato de respeito pelo seu próprio potencial.", author: "Anônimo" },
+  { text: "Não existe forma errada de pensar — existe pensamento ainda não canalizado.", author: "Anônimo" },
+  { text: "O início difícil não prediz o resultado final.", author: "Anônimo" },
+  { text: "Seu sistema nervoso não é seu adversário — é um sistema que merece cuidado.", author: "Anônimo" },
+  { text: "Aceitar ajuda e ferramentas de apoio é sabedoria estratégica, não dependência.", author: "Anônimo" },
+  { text: "A mente precisa de ritmo tanto quanto o corpo precisa de sono.", author: "Anônimo" },
+  { text: "O desafio de hoje calibra a competência de amanhã.", author: "Anônimo" },
+  { text: "Processar informação de forma diferente não é deficiência — é diversidade cognitiva.", author: "Anônimo" },
+  { text: "Cada tarefa que você conclui reforça a evidência de que você é capaz.", author: "Anônimo" },
+  { text: "A atenção plena a uma única tarefa vale mais do que a atenção fragmentada a dez.", author: "Anônimo" },
+  { text: "Progresso invisível ainda é progresso.", author: "Anônimo" },
+  { text: "O cérebro que se conhece bem sabe quando descansar e quando avançar.", author: "Anônimo" },
+  { text: "Dê a si mesmo a mesma paciência que daria a alguém que você respeita profundamente.", author: "Anônimo" },
+  { text: "Estruturar o caos é uma competência, e você está desenvolvendo-a.", author: "Anônimo" },
+  { text: "Não subestime o poder de um dia produtivo sobre o moral de uma semana inteira.", author: "Anônimo" },
+  { text: "A qualidade da sua atenção define a qualidade do seu trabalho.", author: "Anônimo" },
+  { text: "Cada pausa estruturada é um investimento na próxima sessão de foco.", author: "Anônimo" },
+];
+
+/* ============================================================
+   DADOS: DESAFIOS (30 total — 10 por nível)
+============================================================ */
+const CHALLENGES = [
+  // ===== FÁCIL =====
+  {
+    id: 'e1', level: 'easy', time: 10,
+    title: 'Priorização por Urgência e Importância',
+    desc: 'Receba a lista de tarefas abaixo e classifique cada uma na Matriz de Eisenhower (Urgente/Importante, Urgente/Não Importante, Não Urgente/Importante, Não Urgente/Não Importante).',
+    task: 'Tarefas: (1) Responder e-mail urgente do cliente; (2) Organizar a gaveta do escritório; (3) Revisar relatório com prazo amanhã; (4) Aprender nova ferramenta para o trimestre seguinte; (5) Participar de reunião daqui a 30 min; (6) Ler artigo do setor sem data. Classifique cada uma nos quatro quadrantes.',
+    tags: ['Planejamento', 'Organização'],
+    diagram: 'matrix',
+  },
+  {
+    id: 'e2', level: 'easy', time: 8,
+    title: 'Sequenciamento Lógico de Ações',
+    desc: 'Reordene as etapas para que façam sentido causal e temporal.',
+    task: 'Etapas embaralhadas: (A) Publicar o conteúdo; (B) Definir o tema; (C) Revisar o rascunho; (D) Pesquisar referências; (E) Escrever o rascunho. Qual é a sequência correta? Justifique brevemente cada transição.',
+    tags: ['Lógica', 'Planejamento'],
+  },
+  {
+    id: 'e3', level: 'easy', time: 12,
+    title: 'Identificação de Padrão Verbal',
+    desc: 'Encontre a regra que conecta as palavras e complete a série.',
+    task: 'Série 1: Lua → Satélite → Terra → ???\nSérie 2: Quarteto → Trio → Dueto → ???\nSérie 3: Abstrato → Concreto → Geral → ???\nPara cada série, identifique o padrão e explique com uma frase.',
+    tags: ['Linguagem', 'Lógica'],
+  },
+  {
+    id: 'e4', level: 'easy', time: 10,
+    title: 'Resumo com Restrição de Palavras',
+    desc: 'Resuma o parágrafo abaixo em exatamente 3 frases, sem perder as ideias centrais.',
+    task: '"A gestão do tempo não se trata de fazer mais coisas em menos tempo, mas de fazer as coisas certas no momento certo. Pessoas altamente produtivas não trabalham mais horas — elas protegem deliberadamente seu foco nas atividades de maior impacto. O segredo não é a disciplina de ferro, mas o design inteligente do ambiente e das rotinas."\n\nEscreva o resumo em 3 frases. Depois identifique a ideia principal.',
+    tags: ['Linguagem', 'Análise Crítica'],
+  },
+  {
+    id: 'e5', level: 'easy', time: 8,
+    title: 'Categorização de Conceitos',
+    desc: 'Agrupe os termos abaixo em exatamente três categorias coerentes e nomeie cada grupo.',
+    task: 'Termos: Ansiedade, Agenda, Calendário, Pausa, Reunião, Respiração, Lista de tarefas, Meditação, Prazo, Estratégia, Descanso, Objetivo.\nCrie 3 grupos com nomes que reflitam a essência comum. Explique em uma linha cada grupo.',
+    tags: ['Organização', 'Linguagem'],
+  },
+  {
+    id: 'e6', level: 'easy', time: 10,
+    title: 'Análise de Causa e Efeito',
+    desc: 'Para cada situação abaixo, identifique a causa provável e o efeito mais direto.',
+    task: 'Situação 1: Você não dormiu bem e tem uma apresentação importante amanhã.\nSituação 2: A equipe não tem um canal claro de comunicação.\nSituação 3: Você acumula tarefas sem concluir nenhuma.\nPara cada uma: escreva (Causa → Efeito imediato → Estratégia corretiva).',
+    tags: ['Análise Crítica', 'Planejamento'],
+  },
+  {
+    id: 'e7', level: 'easy', time: 12,
+    title: 'Identificação de Premissas em Argumentos',
+    desc: 'Leia o argumento e identifique a premissa oculta que o sustenta.',
+    task: 'Argumento: "Como ela concluiu o projeto em tempo recorde, certamente é a pessoa mais qualificada da equipe."\nPergunta: Qual premissa não declarada sustenta essa conclusão? Essa premissa é válida? Por quê?',
+    tags: ['Análise Crítica', 'Lógica'],
+  },
+  {
+    id: 'e8', level: 'easy', time: 8,
+    title: 'Diferenciação Essencial vs. Acidental',
+    desc: 'Para cada conceito, separe a característica essencial (sem a qual deixa de ser o que é) das acidentais.',
+    task: 'Conceitos: (1) Uma reunião; (2) Um prazo; (3) Um plano de ação.\nPara cada um: liste 1 característica essencial e 2 acidentais. Exemplo: "Cadeira: essencial = serve para sentar; acidental = cor, material."',
+    tags: ['Lógica', 'Análise Crítica'],
+  },
+  {
+    id: 'e9', level: 'easy', time: 10,
+    title: 'Estrutura de E-mail Profissional',
+    desc: 'Reorganize os blocos embaralhados de um e-mail em uma estrutura lógica e profissional.',
+    task: 'Blocos: (A) "Fico à disposição para esclarecer quaisquer dúvidas."; (B) "Conforme combinado em nossa última reunião, segue o relatório revisado."; (C) "Assunto: Relatório Revisado — Projeto Alfa"; (D) "Atenciosamente, [Nome]"; (E) "Prezado [Nome],". Ordene: ___ → ___ → ___ → ___ → ___. Depois reescreva com uma frase de transição entre B e A.',
+    tags: ['Linguagem', 'Organização'],
+  },
+  {
+    id: 'e10', level: 'easy', time: 10,
+    title: 'Mapeamento de Dependências',
+    desc: 'Identifique quais tarefas dependem de outras e construa uma ordem de execução.',
+    task: 'Tarefas: (A) Enviar relatório; (B) Revisar relatório; (C) Redigir relatório; (D) Coletar dados; (E) Definir métricas.\nMonte a cadeia de dependências: ___ → ___ → ___ → ___ → ___ e justifique por que a ordem importa.',
+    tags: ['Planejamento', 'Função Executiva'],
+  },
+
+  // ===== MODERADO =====
+  {
+    id: 'm1', level: 'medium', time: 18,
+    title: 'Análise de Vieses Cognitivos',
+    desc: 'Identifique o viés cognitivo presente em cada raciocínio e proponha uma reavaliação.',
+    task: 'Situação 1: "Sempre trabalhei assim e deu certo, então não preciso mudar."\nSituação 2: "Os primeiros dados confirmaram minha hipótese, então devo estar certo."\nSituação 3: "Todos na minha área pensam igual a mim sobre esse tema."\nPara cada uma: nomeie o viés, explique o mecanismo e proponha uma pergunta que quebre o padrão.',
+    tags: ['Análise Crítica', 'Função Executiva'],
+  },
+  {
+    id: 'm2', level: 'medium', time: 20,
+    title: 'Planejamento de Projeto com Restrições',
+    desc: 'Elabore um plano de execução para o projeto descrito, respeitando as restrições.',
+    task: 'Projeto: Criar e apresentar uma proposta de melhoria de processo.\nRestrições: 3 dias úteis, sem reuniões presenciais, uma pessoa.\nEntregas esperadas: diagnóstico do problema, 3 soluções possíveis, critérios de escolha, plano de execução da solução escolhida.\nEstruture sua resposta com títulos por etapa, estimativa de horas e possíveis riscos.',
+    tags: ['Planejamento', 'Função Executiva'],
+  },
+  {
+    id: 'm3', level: 'medium', time: 15,
+    title: 'Construção de Argumento Contraposto',
+    desc: 'Construa o melhor argumento possível para o lado oposto ao que você acredita.',
+    task: 'Afirmação: "O trabalho remoto reduz a produtividade de equipes colaborativas."\nSua tarefa: escreva 3 argumentos sólidos em DEFESA da afirmação, mesmo que discorde. Use dados plausíveis, lógica causal e exemplos concretos. Em seguida, avalie qual dos seus argumentos é o mais fraco e por quê.',
+    tags: ['Análise Crítica', 'Linguagem'],
+  },
+  {
+    id: 'm4', level: 'medium', time: 20,
+    title: 'Decodificação de Instruções Ambíguas',
+    desc: 'Identifique todas as ambiguidades de uma instrução e reescreva-a de forma precisa.',
+    task: 'Instrução original: "Termine isso logo e me mande quando estiver pronto, mas só se estiver bom."\nTarefa: liste todas as ambiguidades (o que é "isso"? o que é "logo"? o que significa "bom"?). Em seguida, reescreva a instrução eliminando todas as ambiguidades, adicionando critérios objetivos.',
+    tags: ['Linguagem', 'Função Executiva'],
+  },
+  {
+    id: 'm5', level: 'medium', time: 18,
+    title: 'Análise de Trade-offs',
+    desc: 'Para cada decisão, identifique o que é ganho e o que é sacrificado.',
+    task: 'Decisões:\n(1) Aceitar um projeto com prazo curto e alta visibilidade vs. recusar para preservar a qualidade do trabalho atual.\n(2) Automatizar uma tarefa repetitiva vs. manter o controle manual.\n(3) Comunicar um erro imediatamente vs. tentar corrigi-lo primeiro.\nPara cada decisão: liste 3 ganhos e 3 perdas de cada opção, depois declare qual escolheria e o critério decisório.',
+    tags: ['Análise Crítica', 'Planejamento'],
+  },
+  {
+    id: 'm6', level: 'medium', time: 15,
+    title: 'Síntese de Fontes Conflitantes',
+    desc: 'Reconcilie informações contraditórias em uma conclusão coerente.',
+    task: 'Fonte A diz: "Multitarefas treina o cérebro para ser mais ágil."\nFonte B diz: "Multitarefas reduz a eficiência em 40% e aumenta erros."\nSua tarefa: identifique o que pode ser verdadeiro em cada fonte, em que contextos cada uma se aplica, e escreva uma conclusão que integre ambas sem contradição.',
+    tags: ['Análise Crítica', 'Linguagem'],
+  },
+  {
+    id: 'm7', level: 'medium', time: 20,
+    title: 'Estruturação de Comunicação Difícil',
+    desc: 'Elabore a estrutura de uma comunicação delicada de forma profissional e clara.',
+    task: 'Situação: você precisa informar à sua equipe que um projeto importante foi cancelado pela diretoria, afetando meses de trabalho. Não é possível dar detalhes da decisão.\nEstruture a comunicação com: (1) Abertura empática; (2) Fato central objetivo; (3) O que é conhecido sobre os próximos passos; (4) Espaço para perguntas; (5) Fechamento motivador sem ser vazio. Evite eufemismos e frases vazias.',
+    tags: ['Linguagem', 'Função Executiva'],
+  },
+  {
+    id: 'm8', level: 'medium', time: 18,
+    title: 'Análise de Sistema com Retroalimentação',
+    desc: 'Mapeie os ciclos de retroalimentação presentes no sistema descrito.',
+    task: 'Sistema: "Uma equipe sob pressão começa a cometer mais erros. Os erros geram mais retrabalho. O retrabalho aumenta a carga de trabalho. A carga maior aumenta a pressão."\nIdentifique: (1) O ciclo de retroalimentação positiva (amplificação); (2) Onde seria possível inserir um amortecedor; (3) Qual variável, se controlada, quebraria o ciclo.',
+    tags: ['Lógica', 'Análise Crítica'],
+    diagram: 'feedback',
+  },
+  {
+    id: 'm9', level: 'medium', time: 15,
+    title: 'Criação de Critérios de Avaliação',
+    desc: 'Desenvolva uma rubrica objetiva para avaliar algo subjetivo.',
+    task: 'Tarefa: crie uma rubrica para avaliar a qualidade de uma reunião de trabalho.\nA rubrica deve ter: 4 critérios mensuráveis, escala de 1 a 4 para cada critério, descrição clara do que seria pontuação 1 e pontuação 4. Total máximo: 16 pontos. Defina também o que é uma reunião "suficientemente boa" (pontuação mínima aceitável).',
+    tags: ['Organização', 'Análise Crítica'],
+  },
+  {
+    id: 'm10', level: 'medium', time: 20,
+    title: 'Reformulação de Problema',
+    desc: 'Redefina um problema de múltiplas perspectivas para encontrar soluções não óbvias.',
+    task: 'Problema original: "Não tenho tempo suficiente para concluir as tarefas."\nReformule o problema de 3 perspectivas diferentes:\n(1) Perspectiva de sistema (quais processos causam isso?);\n(2) Perspectiva de percepção (o problema é real ou percebido?);\n(3) Perspectiva de recurso (o que tenho que ainda não estou usando?).\nPara cada reformulação, proponha uma solução diferente.',
+    tags: ['Função Executiva', 'Análise Crítica'],
+  },
+
+  // ===== DIFÍCIL =====
+  {
+    id: 'h1', level: 'hard', time: 30,
+    title: 'Modelagem de Decisão sob Incerteza',
+    desc: 'Construa um modelo de decisão estruturado para um cenário com variáveis desconhecidas.',
+    task: 'Cenário: você precisa decidir entre expandir uma área da sua carreira (alto risco, alta recompensa potencial) ou consolidar sua posição atual (risco baixo, crescimento moderado). Você tem 6 meses de reserva financeira.\nConstrua: (1) Árvore de decisão com pelo menos 3 ramificações por opção; (2) Lista de premissas que cada cenário depende; (3) Variáveis que monitoraria para revisar a decisão; (4) Critério de irreversibilidade — até que ponto a decisão pode ser revertida?',
+    tags: ['Planejamento', 'Análise Crítica', 'Função Executiva'],
+    diagram: 'decision-tree',
+  },
+  {
+    id: 'h2', level: 'hard', time: 35,
+    title: 'Construção de Framework Analítico',
+    desc: 'Crie um framework original para analisar um tipo recorrente de problema.',
+    task: 'Problema recorrente: "Projetos que começam bem mas perdem força no meio do caminho."\nConstrua um framework de diagnóstico com: (1) 5 dimensões de análise (ex: motivação, recursos, clareza de objetivo, etc.); (2) Para cada dimensão, 3 indicadores observáveis; (3) Uma escala de saúde do projeto (0-10) com descrição do que cada extremo representa; (4) Um protocolo de intervenção de 3 passos baseado no diagnóstico.',
+    tags: ['Planejamento', 'Lógica', 'Função Executiva'],
+  },
+  {
+    id: 'h3', level: 'hard', time: 30,
+    title: 'Análise de Segunda Ordem',
+    desc: 'Identifique as consequências das consequências de uma decisão.',
+    task: 'Decisão: uma empresa decide eliminar todos os processos manuais e automatizar completamente o atendimento ao cliente.\nAnálise de primeira ordem (efeitos diretos): liste 4.\nAnálise de segunda ordem (efeitos dos efeitos): para cada efeito direto, identifique 2 consequências subsequentes.\nAnálise de terceira ordem: identifique o efeito mais inesperado da cadeia de segunda ordem.\nConclua: essa decisão é positiva, negativa ou dependente de contexto? Fundamente.',
+    tags: ['Análise Crítica', 'Lógica'],
+  },
+  {
+    id: 'h4', level: 'hard', time: 40,
+    title: 'Design de Sistema Pessoal de Produtividade',
+    desc: 'Projete um sistema completo e funcional de gestão pessoal adaptado à neurodivergência.',
+    task: 'Seu sistema deve contemplar: (1) Captura de tarefas e ideias; (2) Triagem e priorização; (3) Execução com proteção de foco; (4) Revisão diária e semanal; (5) Estratégias para iniciar tarefas com alto custo de iniciação; (6) Sistema de recompensa e reconhecimento; (7) Protocolo para dias de baixo funcionamento. Para cada componente: descreva o método, a frequência e os critérios de sucesso.',
+    tags: ['Função Executiva', 'Planejamento', 'Organização'],
+  },
+  {
+    id: 'h5', level: 'hard', time: 35,
+    title: 'Desconstrução e Reconstrução de Argumento',
+    desc: 'Decomponha um argumento complexo até seus elementos fundamentais e reconstrua-o com maior solidez.',
+    task: 'Argumento: "Pessoas neurodivergentes têm desempenho inferior em ambientes corporativos porque não se adaptam às estruturas convencionais de trabalho."\nDesconstrução: (1) Separe premissas explícitas e implícitas; (2) Identifique falácias lógicas; (3) Mapeie o que o argumento pressupõe sobre "adaptação" e "desempenho".\nReconstrução: reescreva o argumento de forma que seja empiricamente defensável, eliminando as falácias e redefinindo os termos centrais.',
+    tags: ['Análise Crítica', 'Linguagem'],
+  },
+  {
+    id: 'h6', level: 'hard', time: 30,
+    title: 'Planejamento com Restrições Múltiplas Simultâneas',
+    desc: 'Elabore um plano que satisfaça todas as restrições listadas simultaneamente.',
+    task: 'Objetivo: apresentar um novo produto internamente em 5 dias úteis.\nRestrições simultâneas: budget zero, equipe de 1 pessoa, sem recursos de design profissional, apresentação deve durar exatamente 20 minutos, deve incluir dados de mercado, deve ter aprovação de 3 stakeholders antes da apresentação.\nElabore um cronograma hora a hora para os 5 dias, identificando as dependências críticas e os riscos de cada etapa.',
+    tags: ['Planejamento', 'Função Executiva'],
+  },
+  {
+    id: 'h7', level: 'hard', time: 35,
+    title: 'Análise de Modelo Mental',
+    desc: 'Identifique e questione os modelos mentais que sustentam um comportamento problemático.',
+    task: 'Comportamento: procrastinação crônica em tarefas de alta importância mas baixa urgência imediata.\nAnálise: (1) Liste 5 crenças implícitas que sustentam esse padrão; (2) Para cada crença, identifique a experiência original que pode tê-la formado; (3) Teste cada crença com evidências contrárias reais; (4) Proponha um modelo mental alternativo para cada crença; (5) Desenhe o caminho de transição entre o modelo atual e o alternativo.',
+    tags: ['Análise Crítica', 'Função Executiva'],
+  },
+  {
+    id: 'h8', level: 'hard', time: 40,
+    title: 'Síntese Interdisciplinar',
+    desc: 'Conecte conceitos de diferentes áreas para resolver um problema complexo.',
+    task: 'Problema: equipe altamente qualificada com baixo engajamento e alta rotatividade.\nAplique conceitos de: (1) Psicologia (Teoria da Autodeterminação); (2) Design de sistemas (pontos de alavancagem); (3) Economia comportamental (arquitetura de escolha); (4) Neurociência (ciclos de recompensa).\nPara cada área: explique o conceito em 2 frases, aplique ao problema com uma intervenção concreta. Ao final, integre as quatro intervenções em um plano coeso.',
+    tags: ['Análise Crítica', 'Planejamento', 'Lógica'],
+  },
+  {
+    id: 'h9', level: 'hard', time: 35,
+    title: 'Detecção de Inconsistências em Discurso Complexo',
+    desc: 'Analise o texto e identifique todas as inconsistências internas e com a realidade.',
+    task: 'Texto: "Nossa empresa valoriza profundamente a diversidade e inclusão, tanto que contratamos profissionais de todo o mundo. Nossos processos seletivos são completamente objetivos e baseados em mérito. Entendemos que pessoas diferentes trazem perspectivas distintas, por isso padronizamos rigorosamente a forma de trabalhar para garantir eficiência. Celebramos a individualidade, mas esperamos que todos se adaptem rapidamente à nossa cultura."\nIdentifique: (1) Contradições internas; (2) Termos usados de forma ambígua; (3) Premissas não fundamentadas; (4) Reescreva o parágrafo eliminando todas as inconsistências.',
+    tags: ['Análise Crítica', 'Linguagem'],
+  },
+  {
+    id: 'h10', level: 'hard', time: 45,
+    title: 'Projeto de Aprendizado Autônomo',
+    desc: 'Construa um currículo completo de auto-aprendizado para uma habilidade complexa.',
+    task: 'Habilidade a desenvolver: Tomada de decisão sob pressão e incerteza.\nProjete: (1) Diagnóstico inicial — como avaliar o nível atual; (2) Mapa de competências em 4 níveis (básico → avançado); (3) Recursos para cada nível (livros, exercícios, situações práticas); (4) Métricas de progresso para cada nível; (5) Protocolo de prática deliberada — frequência, duração e tipo de feedback; (6) Sinais de que está pronto para avançar de nível; (7) Estratégias específicas para manter o aprendizado durante períodos de alta demanda.',
+    tags: ['Planejamento', 'Função Executiva', 'Organização'],
+  },
+];
+
+/* ============================================================
+   WEB AUDIO API — SÍNTESE DE SONS
+============================================================ */
+let audioCtx = null;
+let activeSound = null;
+let masterGain = null;
+
+function getAudioCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0.5;
+    masterGain.connect(audioCtx.destination);
+  }
+  return audioCtx;
+}
+
+const SOUNDS = [
+  {
+    id: 'rain', name: 'Chuva', icon: '🌧️',
+    make: (ctx, dest) => {
+      const buf = createNoise(ctx, 'pink', 3);
+      const src = ctx.createBufferSource();
+      src.buffer = buf; src.loop = true;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass'; filter.frequency.value = 600; filter.Q.value = 0.4;
+      src.connect(filter); filter.connect(dest);
+      src.start(); return src;
+    }
+  },
+  {
+    id: 'ocean', name: 'Mar', icon: '🌊',
+    make: (ctx, dest) => {
+      const buf = createNoise(ctx, 'brown', 4);
+      const src = ctx.createBufferSource();
+      src.buffer = buf; src.loop = true;
+      const lfo = ctx.createOscillator();
+      const lfoGain = ctx.createGain();
+      lfo.frequency.value = 0.1;
+      lfoGain.gain.value = 0.4;
+      lfo.connect(lfoGain); lfoGain.connect(dest);
+      src.connect(dest); src.start(); lfo.start();
+      return { stop: () => { src.stop(); lfo.stop(); }};
+    }
+  },
+  {
+    id: 'forest', name: 'Floresta', icon: '🌿',
+    make: (ctx, dest) => {
+      const buf = createNoise(ctx, 'green', 3);
+      const src = ctx.createBufferSource();
+      src.buffer = buf; src.loop = true;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'highpass'; filter.frequency.value = 800;
+      src.connect(filter); filter.connect(dest);
+      src.start(); return src;
+    }
+  },
+  {
+    id: 'wind', name: 'Vento', icon: '💨',
+    make: (ctx, dest) => {
+      const buf = createNoise(ctx, 'white', 3);
+      const src = ctx.createBufferSource();
+      src.buffer = buf; src.loop = true;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass'; filter.frequency.value = 400;
+      src.connect(filter); filter.connect(dest);
+      src.start(); return src;
+    }
+  },
+  {
+    id: 'fire', name: 'Lareira', icon: '🔥',
+    make: (ctx, dest) => {
+      const buf = createNoise(ctx, 'brown', 3);
+      const src = ctx.createBufferSource();
+      src.buffer = buf; src.loop = true;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowshelf'; filter.frequency.value = 300; filter.gain.value = 8;
+      src.connect(filter); filter.connect(dest);
+      src.start(); return src;
+    }
+  },
+  {
+    id: 'white', name: 'Ruído Branco', icon: '📻',
+    make: (ctx, dest) => {
+      const buf = createNoise(ctx, 'white', 3);
+      const src = ctx.createBufferSource();
+      src.buffer = buf; src.loop = true;
+      src.connect(dest); src.start(); return src;
+    }
+  },
+  {
+    id: 'brown', name: 'Ruído Marrom', icon: '🤎',
+    make: (ctx, dest) => {
+      const buf = createNoise(ctx, 'brown', 3);
+      const src = ctx.createBufferSource();
+      src.buffer = buf; src.loop = true;
+      src.connect(dest); src.start(); return src;
+    }
+  },
+  {
+    id: 'piano', name: 'Piano Suave', icon: '🎹',
+    make: (ctx, dest) => {
+      const notes = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88];
+      let i = 0;
+      const gainNode = ctx.createGain();
+      gainNode.gain.value = 0.25;
+      gainNode.connect(dest);
+      let stopped = false;
+      function playNote() {
+        if (stopped) return;
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = notes[i % notes.length];
+        g.gain.setValueAtTime(0, ctx.currentTime);
+        g.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 0.1);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.0);
+        osc.connect(g); g.connect(gainNode);
+        osc.start(); osc.stop(ctx.currentTime + 2.2);
+        i++;
+        setTimeout(playNote, 2200 + Math.random() * 1200);
+      }
+      playNote();
+      return { stop: () => { stopped = true; } };
+    }
+  },
+  {
+    id: 'theta', name: 'Ondas Theta', icon: '🧘',
+    make: (ctx, dest) => {
+      const carrier = 200;
+      const beat = 6;
+      const oscL = ctx.createOscillator();
+      const oscR = ctx.createOscillator();
+      const gainL = ctx.createGain();
+      const gainR = ctx.createGain();
+      const merger = ctx.createChannelMerger(2);
+      oscL.frequency.value = carrier;
+      oscR.frequency.value = carrier + beat;
+      oscL.type = 'sine'; oscR.type = 'sine';
+      gainL.gain.value = 0.3; gainR.gain.value = 0.3;
+      oscL.connect(gainL); gainL.connect(merger, 0, 0);
+      oscR.connect(gainR); gainR.connect(merger, 0, 1);
+      merger.connect(dest);
+      oscL.start(); oscR.start();
+      return { stop: () => { oscL.stop(); oscR.stop(); } };
+    }
+  },
+  {
+    id: 'binaural', name: 'Binaural', icon: '🎧',
+    make: (ctx, dest) => {
+      const carrier = 180;
+      const beat = 10;
+      const oscL = ctx.createOscillator();
+      const oscR = ctx.createOscillator();
+      const gainL = ctx.createGain();
+      const gainR = ctx.createGain();
+      const merger = ctx.createChannelMerger(2);
+      oscL.frequency.value = carrier;
+      oscR.frequency.value = carrier + beat;
+      oscL.type = 'sine'; oscR.type = 'sine';
+      gainL.gain.value = 0.25; gainR.gain.value = 0.25;
+      oscL.connect(gainL); gainL.connect(merger, 0, 0);
+      oscR.connect(gainR); gainR.connect(merger, 0, 1);
+      merger.connect(dest);
+      oscL.start(); oscR.start();
+      return { stop: () => { oscL.stop(); oscR.stop(); } };
+    }
+  },
+];
+
+function createNoise(ctx, type, durationSec) {
+  const sr = ctx.sampleRate;
+  const frames = sr * durationSec;
+  const buf = ctx.createBuffer(1, frames, sr);
+  const data = buf.getChannelData(0);
+  if (type === 'white') {
+    for (let i = 0; i < frames; i++) data[i] = Math.random() * 2 - 1;
+  } else if (type === 'brown') {
+    let last = 0;
+    for (let i = 0; i < frames; i++) {
+      const w = Math.random() * 2 - 1;
+      last = (last + 0.02 * w) / 1.02;
+      data[i] = last * 3.5;
+    }
+  } else if (type === 'pink' || type === 'green') {
+    let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+    for (let i = 0; i < frames; i++) {
+      const w = Math.random() * 2 - 1;
+      b0 = 0.99886*b0 + w*0.0555179;
+      b1 = 0.99332*b1 + w*0.0750759;
+      b2 = 0.96900*b2 + w*0.1538520;
+      b3 = 0.86650*b3 + w*0.3104856;
+      b4 = 0.55000*b4 + w*0.5329522;
+      b5 = -0.7616*b5 - w*0.0168980;
+      data[i] = (b0+b1+b2+b3+b4+b5+b6+w*0.5362) * 0.11;
+      b6 = w * 0.115926;
+    }
+  }
+  return buf;
+}
+
+let activeSoundNode = null;
+let activeSoundId = null;
+
+function stopSound() {
+  if (activeSoundNode) {
+    if (typeof activeSoundNode.stop === 'function') activeSoundNode.stop();
+    activeSoundNode = null;
+  }
+  activeSoundId = null;
+  document.querySelectorAll('.sound-card').forEach(c => c.classList.remove('playing'));
+  document.querySelectorAll('.sound-status').forEach(s => s.textContent = '');
+  document.getElementById('eq-display').style.setProperty('display', 'none', 'important');
+}
+
+function playSound(soundId) {
+  const ctx = getAudioCtx();
+  if (ctx.state === 'suspended') ctx.resume();
+  if (activeSoundId === soundId) { stopSound(); return; }
+  stopSound();
+  const sound = SOUNDS.find(s => s.id === soundId);
+  if (!sound) return;
+  activeSoundNode = sound.make(ctx, masterGain);
+  activeSoundId = soundId;
+  const card = document.querySelector(`.sound-card[data-id="${soundId}"]`);
+  if (card) {
+    card.classList.add('playing');
+    card.querySelector('.sound-status').textContent = '▶ Tocando';
+  }
+  document.getElementById('eq-display').style.removeProperty('display');
+  document.getElementById('eq-display').style.display = 'flex';
+}
+
+/* ============================================================
+   TIMER POMODORO
+============================================================ */
+const TimerState = {
+  phase: 'focus',
+  running: false,
+  remaining: 0,
+  totalForPhase: 0,
+  interval: null,
+  sessions: 0,
+  completedSessions: 0,
+  config: { focus: 25, short: 5, long: 15, sessionsBeforeLong: 4 },
+};
+
+function timerMinutes(type) {
+  return TimerState.config[type] * 60;
+}
+
+function initTimer() {
+  TimerState.phase = 'focus';
+  TimerState.totalForPhase = timerMinutes('focus');
+  TimerState.remaining = TimerState.totalForPhase;
+  renderTimerDisplay();
+  renderSessionDots();
+  updateTimerRing();
+}
+
+function formatTime(secs) {
+  const m = String(Math.floor(secs / 60)).padStart(2, '0');
+  const s = String(secs % 60).padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+function renderTimerDisplay() {
+  const t = formatTime(TimerState.remaining);
+  document.getElementById('timer-display').textContent = t;
+  document.getElementById('focus-overlay-time').textContent = t;
+  const phaseLabels = { focus: 'CONCENTRAÇÃO', short: 'PAUSA CURTA', long: 'PAUSA LONGA' };
+  const badgeLabels = { focus: 'FOCO', short: 'PAUSA CURTA', long: 'PAUSA LONGA' };
+  document.getElementById('timer-phase-label').textContent = phaseLabels[TimerState.phase];
+  document.getElementById('focus-overlay-phase').textContent = phaseLabels[TimerState.phase];
+  document.getElementById('timer-mode-badge').textContent = badgeLabels[TimerState.phase];
+}
+
+function updateTimerRing() {
+  const circumference = 628.318;
+  const progress = TimerState.remaining / TimerState.totalForPhase;
+  const offset = circumference * (1 - progress);
+  document.getElementById('timer-ring-progress').style.strokeDashoffset = offset;
+  document.getElementById('focus-ring-progress').style.strokeDashoffset = offset;
+}
+
+function renderSessionDots() {
+  const container = document.getElementById('session-dots');
+  container.innerHTML = '';
+  for (let i = 0; i < TimerState.config.sessionsBeforeLong; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'session-dot' + (i < TimerState.completedSessions ? ' done' : '');
+    container.appendChild(dot);
+  }
+}
+
+function startTimer() {
+  if (TimerState.running) {
+    clearInterval(TimerState.interval);
+    TimerState.running = false;
+    document.getElementById('btn-timer-start').textContent = '▶';
+    return;
+  }
+  TimerState.running = true;
+  document.getElementById('btn-timer-start').textContent = '⏸';
+  TimerState.interval = setInterval(() => {
+    TimerState.remaining--;
+    renderTimerDisplay();
+    updateTimerRing();
+    if (TimerState.remaining <= 0) advancePhase();
+  }, 1000);
+}
+
+function advancePhase() {
+  clearInterval(TimerState.interval);
+  TimerState.running = false;
+  document.getElementById('btn-timer-start').textContent = '▶';
+
+  if (TimerState.phase === 'focus') {
+    TimerState.completedSessions++;
+    updateStats('sessions', 1);
+    updateStats('focus_minutes', Math.round(TimerState.config.focus));
+    renderSessionDots();
+    if (TimerState.completedSessions % TimerState.config.sessionsBeforeLong === 0) {
+      TimerState.phase = 'long';
+      TimerState.totalForPhase = timerMinutes('long');
+      toast('🌿 Pausa longa! Você merece descanso.', 'success');
+    } else {
+      TimerState.phase = 'short';
+      TimerState.totalForPhase = timerMinutes('short');
+      toast('☕ Pausa curta. Respire.', 'success');
+    }
+  } else {
+    TimerState.phase = 'focus';
+    TimerState.totalForPhase = timerMinutes('focus');
+    toast('🎯 Novo ciclo de foco iniciado.', 'info');
+  }
+
+  TimerState.remaining = TimerState.totalForPhase;
+  renderTimerDisplay();
+  updateTimerRing();
+}
+
+function resetTimer() {
+  clearInterval(TimerState.interval);
+  TimerState.running = false;
+  TimerState.phase = 'focus';
+  TimerState.totalForPhase = timerMinutes('focus');
+  TimerState.remaining = TimerState.totalForPhase;
+  document.getElementById('btn-timer-start').textContent = '▶';
+  renderTimerDisplay();
+  updateTimerRing();
+}
+
+/* ============================================================
+   ESTADO DOS DESAFIOS
+============================================================ */
+let challengeFilter = 'all';
+let activeChallengeId = null;
+let challengeTimer = null;
+let challengeTimeLeft = 0;
+let challengeTimerTotal = 0;
+
+function loadCompletedChallenges() {
+  try { return JSON.parse(localStorage.getItem('fc_completed') || '[]'); } catch { return []; }
+}
+
+function saveCompletedChallenges(arr) {
+  localStorage.setItem('fc_completed', JSON.stringify(arr));
+}
+
+function markCompleted(id) {
+  const arr = loadCompletedChallenges();
+  if (!arr.includes(id)) { arr.push(id); saveCompletedChallenges(arr); }
+}
+
+function unmarkCompleted(id) {
+  let arr = loadCompletedChallenges();
+  arr = arr.filter(x => x !== id);
+  saveCompletedChallenges(arr);
+}
+
+/* ============================================================
+   RENDER CHALLENGES
+============================================================ */
+function renderChallenges() {
+  const completed = loadCompletedChallenges();
+  const list = document.getElementById('challenge-list');
+  list.innerHTML = '';
+
+  const filtered = challengeFilter === 'all'
+    ? CHALLENGES
+    : CHALLENGES.filter(c => c.level === challengeFilter);
+
+  document.getElementById('challenge-count-label').textContent =
+    `${filtered.length} desafios`;
+
+  const totalAll = CHALLENGES.length;
+  const totalCompleted = completed.filter(id => CHALLENGES.find(c => c.id === id)).length;
+  document.getElementById('global-progress').style.width =
+    `${totalAll > 0 ? (totalCompleted / totalAll) * 100 : 0}%`;
+  document.getElementById('global-progress-label').textContent =
+    `${totalCompleted} / ${totalAll}`;
+
+  filtered.forEach(ch => {
+    const isDone = completed.includes(ch.id);
+    const isActive = ch.id === activeChallengeId;
+
+    const item = document.createElement('div');
+    item.className = 'challenge-item' +
+      (isDone ? ' completed' : '') +
+      (isActive ? ' active-challenge' : '');
+    item.innerHTML = `
+      <div class="challenge-top">
+        <div class="challenge-title">${ch.title}</div>
+        <div class="challenge-meta">
+          <span class="badge badge-${ch.level === 'easy' ? 'easy' : ch.level === 'medium' ? 'medium' : 'hard'}">
+            ${ch.level === 'easy' ? 'Fácil' : ch.level === 'medium' ? 'Moderado' : 'Difícil'}
+          </span>
+          <span class="text-muted" style="font-size:0.78rem;">⏱ ${ch.time} min</span>
+          ${isDone ? '<span class="text-success" style="font-size:0.9rem;">✓</span>' : ''}
+        </div>
+      </div>
+      <div class="challenge-desc">${ch.desc}</div>
+      <div class="challenge-tags">
+        ${ch.tags.map(t => `<span class="challenge-tag">${t}</span>`).join('')}
+      </div>
+    `;
+    item.addEventListener('click', () => toggleChallengeDetail(ch));
+    list.appendChild(item);
+  });
+}
+
+/* ============================================================
+   CHALLENGE DETAIL
+============================================================ */
+function toggleChallengeDetail(ch) {
+  const panel = document.getElementById('challenge-detail-panel');
+  if (activeChallengeId === ch.id) {
+    activeChallengeId = null;
+    clearInterval(challengeTimer);
+    panel.classList.add('hidden');
+    panel.innerHTML = '';
+    renderChallenges();
+    return;
+  }
+  activeChallengeId = ch.id;
+  openChallengeDetail(ch);
+  renderChallenges();
+}
+
+function openChallengeDetail(ch) {
+  const panel = document.getElementById('challenge-detail-panel');
+  panel.classList.remove('hidden');
+  clearInterval(challengeTimer);
+  challengeTimeLeft = ch.time * 60;
+  challengeTimerTotal = ch.time * 60;
+
+  const diagHtml = ch.diagram ? buildDiagram(ch.diagram) : '';
+  const completed = loadCompletedChallenges();
+  const isDone = completed.includes(ch.id);
+
+  panel.innerHTML = `
+    <div class="challenge-detail">
+      <div class="flex items-center justify-between mb-12">
+        <h3>${ch.title}</h3>
+        <button class="btn btn-sm" id="btn-close-challenge">✕ Fechar</button>
+      </div>
+
+      <div class="flex items-center gap-12 mb-8" style="gap:12px;">
+        <span class="text-muted" style="font-size:0.78rem; white-space:nowrap;">⏱ Tempo restante:</span>
+        <div class="challenge-timer-bar w-full"><div class="challenge-timer-fill" id="ch-timer-fill" style="width:100%"></div></div>
+        <span style="font-size:0.85rem; font-family:var(--font-ui); white-space:nowrap;" id="ch-timer-display">${ch.time}:00</span>
+        <button class="btn btn-sm" id="btn-ch-timer-toggle">▶ Iniciar</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <p style="font-size:0.9rem; color:var(--text-dim); line-height:1.7; margin-bottom:16px;">${ch.desc}</p>
+
+      <div style="background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:18px; margin-bottom:16px;">
+        <div class="form-label mb-8">TAREFA</div>
+        <p style="font-size:0.92rem; line-height:1.8; white-space:pre-wrap;">${ch.task}</p>
+      </div>
+
+      ${diagHtml}
+
+      <div class="challenge-answer-area">
+        <div class="form-label mb-8">SUA RESPOSTA / ANOTAÇÕES</div>
+        <textarea id="ch-answer" placeholder="Escreva sua resposta, raciocínio ou anotações aqui…" style="min-height:120px;"></textarea>
+      </div>
+
+      <div class="flex gap-12 mt-16" style="gap:12px;">
+        <button class="btn btn-success" id="btn-complete-ch" ${isDone ? 'style="opacity:0.5;"' : ''}>
+          ${isDone ? '✓ Concluído' : '✓ Marcar como Concluído'}
+        </button>
+        ${isDone ? `<button class="btn btn-sm" id="btn-uncomplete-ch">Desmarcar</button>` : ''}
+      </div>
+    </div>
+  `;
+
+  const savedAnswer = localStorage.getItem(`fc_answer_${ch.id}`) || '';
+  document.getElementById('ch-answer').value = savedAnswer;
+  document.getElementById('ch-answer').addEventListener('input', (e) => {
+    localStorage.setItem(`fc_answer_${ch.id}`, e.target.value);
+  });
+
+  let chRunning = false;
+  const btnToggle = document.getElementById('btn-ch-timer-toggle');
+  btnToggle.addEventListener('click', () => {
+    chRunning = !chRunning;
+    btnToggle.textContent = chRunning ? '⏸ Pausar' : '▶ Retomar';
+    if (chRunning) {
+      challengeTimer = setInterval(() => {
+        if (challengeTimeLeft > 0) challengeTimeLeft--;
+        const fill = document.getElementById('ch-timer-fill');
+        const disp = document.getElementById('ch-timer-display');
+        if (fill) fill.style.width = `${(challengeTimeLeft / challengeTimerTotal) * 100}%`;
+        if (disp) disp.textContent = formatTime(challengeTimeLeft);
+        if (challengeTimeLeft === 0) {
+          clearInterval(challengeTimer);
+          toast('⏱ Tempo do desafio esgotado.', 'warn');
+        }
+      }, 1000);
+    } else {
+      clearInterval(challengeTimer);
+    }
+  });
+
+  document.getElementById('btn-close-challenge').addEventListener('click', () => {
+    activeChallengeId = null;
+    clearInterval(challengeTimer);
+    panel.classList.add('hidden');
+    panel.innerHTML = '';
+    renderChallenges();
+  });
+
+  document.getElementById('btn-complete-ch').addEventListener('click', () => {
+    markCompleted(ch.id);
+    updateStats('challenges_done', 1);
+    toast('✓ Desafio concluído!', 'success');
+    activeChallengeId = null;
+    clearInterval(challengeTimer);
+    panel.classList.add('hidden');
+    panel.innerHTML = '';
+    renderChallenges();
+  });
+
+  const btnUndo = document.getElementById('btn-uncomplete-ch');
+  if (btnUndo) {
+    btnUndo.addEventListener('click', () => {
+      unmarkCompleted(ch.id);
+      toast('Desafio desmarcado.', 'info');
+      activeChallengeId = null;
+      clearInterval(challengeTimer);
+      panel.classList.add('hidden');
+      panel.innerHTML = '';
+      renderChallenges();
+    });
+  }
+}
+
+function buildDiagram(type) {
+  if (type === 'matrix') {
+    return `
+    <div class="challenge-diagram">
+      <div class="form-label mb-8">MATRIZ DE EISENHOWER</div>
+      <svg class="diagram-svg" viewBox="0 0 400 300" style="max-width:400px;">
+        <rect x="10"  y="10"  width="185" height="135" rx="8" fill="#1a2e24" stroke="#3ecfb2" stroke-width="1.2"/>
+        <text x="103" y="38"  text-anchor="middle" font-size="11" fill="#3ecfb2" font-weight="bold">URGENTE + IMPORTANTE</text>
+        <text x="103" y="56"  text-anchor="middle" font-size="10" fill="#6b7390">→ Faça agora</text>
+        <rect x="205" y="10"  width="185" height="135" rx="8" fill="#1a1f2e" stroke="#4f8ef7" stroke-width="1.2"/>
+        <text x="297" y="38"  text-anchor="middle" font-size="11" fill="#4f8ef7" font-weight="bold">NÃO URGENTE + IMPORTANTE</text>
+        <text x="297" y="56"  text-anchor="middle" font-size="10" fill="#6b7390">→ Agende</text>
+        <rect x="10"  y="155" width="185" height="135" rx="8" fill="#2e2510" stroke="#f0a94a" stroke-width="1.2"/>
+        <text x="103" y="183" text-anchor="middle" font-size="11" fill="#f0a94a" font-weight="bold">URGENTE + NÃO IMPORTANTE</text>
+        <text x="103" y="201" text-anchor="middle" font-size="10" fill="#6b7390">→ Delegue</text>
+        <rect x="205" y="155" width="185" height="135" rx="8" fill="#2e1515" stroke="#e05c5c" stroke-width="1.2"/>
+        <text x="297" y="183" text-anchor="middle" font-size="11" fill="#e05c5c" font-weight="bold">NÃO URGENTE + NÃO IMPORTANTE</text>
+        <text x="297" y="201" text-anchor="middle" font-size="10" fill="#6b7390">→ Elimine</text>
+      </svg>
+    </div>`;
+  } else if (type === 'feedback') {
+    return `
+    <div class="challenge-diagram">
+      <div class="form-label mb-8">CICLO DE RETROALIMENTAÇÃO</div>
+      <svg class="diagram-svg" viewBox="0 0 480 200" style="max-width:480px;">
+        <rect x="10"  y="80"  width="100" height="40" rx="8" fill="#1c2030" stroke="#e05c5c" stroke-width="1.2"/>
+        <text x="60"  y="105" text-anchor="middle" font-size="10" fill="#e05c5c">Pressão</text>
+        <rect x="165" y="80"  width="100" height="40" rx="8" fill="#1c2030" stroke="#f0a94a" stroke-width="1.2"/>
+        <text x="215" y="105" text-anchor="middle" font-size="10" fill="#f0a94a">Erros</text>
+        <rect x="320" y="80"  width="100" height="40" rx="8" fill="#1c2030" stroke="#7b61ff" stroke-width="1.2"/>
+        <text x="370" y="105" text-anchor="middle" font-size="10" fill="#7b61ff">Retrabalho</text>
+        <line x1="110" y1="100" x2="163" y2="100" stroke="#6b7390" stroke-width="1.2" marker-end="url(#arrow)"/>
+        <line x1="265" y1="100" x2="318" y2="100" stroke="#6b7390" stroke-width="1.2" marker-end="url(#arrow)"/>
+        <path d="M 370 120 Q 370 170 60 170 Q 60 120 60 120" fill="none" stroke="#e05c5c" stroke-width="1.2" stroke-dasharray="5,3" marker-end="url(#arrow)"/>
+        <text x="215" y="185" text-anchor="middle" font-size="9" fill="#6b7390">retroalimentação positiva (amplificação)</text>
+      </svg>
+    </div>`;
+  } else if (type === 'decision-tree') {
+    return `
+    <div class="challenge-diagram">
+      <div class="form-label mb-8">ÁRVORE DE DECISÃO — EXEMPLO</div>
+      <svg class="diagram-svg" viewBox="0 0 520 240" style="max-width:520px;">
+        <rect x="195" y="10"  width="130" height="40" rx="8" fill="#1c2030" stroke="#7b61ff" stroke-width="1.5"/>
+        <text x="260" y="35"  text-anchor="middle" font-size="11" fill="#7b61ff">Decisão Central</text>
+        <line x1="230" y1="50"  x2="100" y2="110" stroke="#4f8ef7" stroke-width="1.2"/>
+        <rect x="40"  y="110" width="120" height="38" rx="8" fill="#1a1f2e" stroke="#4f8ef7" stroke-width="1.2"/>
+        <text x="100" y="133" text-anchor="middle" font-size="10" fill="#4f8ef7">Opção A: Expandir</text>
+        <line x1="290" y1="50"  x2="420" y2="110" stroke="#3ecfb2" stroke-width="1.2"/>
+        <rect x="360" y="110" width="120" height="38" rx="8" fill="#1a2e24" stroke="#3ecfb2" stroke-width="1.2"/>
+        <text x="420" y="133" text-anchor="middle" font-size="10" fill="#3ecfb2">Opção B: Consolidar</text>
+        <line x1="80"  y1="148" x2="50"  y2="190" stroke="#4f8ef7" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="38"  y="205" font-size="9" fill="#6b7390">Mercado sobe</text>
+        <line x1="120" y1="148" x2="140" y2="190" stroke="#4f8ef7" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="108" y="205" font-size="9" fill="#6b7390">Mercado cai</text>
+        <line x1="400" y1="148" x2="380" y2="190" stroke="#3ecfb2" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="348" y="205" font-size="9" fill="#6b7390">Estabilidade</text>
+        <line x1="440" y1="148" x2="460" y2="190" stroke="#3ecfb2" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="428" y="205" font-size="9" fill="#6b7390">Estagnação</text>
+      </svg>
+    </div>`;
+  }
+  return '';
+}
+
+/* ============================================================
+   SOUNDS UI
+============================================================ */
+function renderSounds() {
+  const grid = document.getElementById('sounds-grid');
+  grid.innerHTML = '';
+  SOUNDS.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'sound-card';
+    card.dataset.id = s.id;
+    card.innerHTML = `
+      <div class="sound-icon">${s.icon}</div>
+      <div class="sound-name">${s.name}</div>
+      <div class="sound-status"></div>
+    `;
+    card.addEventListener('click', () => playSound(s.id));
+    grid.appendChild(card);
+  });
+}
+
+/* ============================================================
+   QUOTES
+============================================================ */
+let currentQuoteIdx = -1;
+
+function showRandomQuote() {
+  let idx;
+  do { idx = Math.floor(Math.random() * QUOTES.length); } while (idx === currentQuoteIdx && QUOTES.length > 1);
+  currentQuoteIdx = idx;
+  const q = QUOTES[idx];
+  const textEl = document.getElementById('quote-text');
+  const authEl = document.getElementById('quote-author');
+  textEl.style.opacity = 0;
+  setTimeout(() => {
+    textEl.textContent = q.text;
+    authEl.textContent = `— ${q.author}`;
+    textEl.style.transition = 'opacity 0.4s';
+    textEl.style.opacity = 1;
+  }, 200);
+}
+
+function renderAllQuotes() {
+  const list = document.getElementById('all-quotes-list');
+  list.innerHTML = '';
+  QUOTES.forEach((q) => {
+    const div = document.createElement('div');
+    div.style.cssText = 'padding:12px 16px; background:var(--surface2); border:1px solid var(--border); border-radius:8px;';
+    div.innerHTML = `
+      <p style="font-size:0.88rem; font-style:italic; color:var(--text); margin-bottom:4px;">${q.text}</p>
+      <p style="font-size:0.74rem; font-family:var(--font-ui); color:var(--text-muted); letter-spacing:0.05em;">— ${q.author}</p>
+    `;
+    list.appendChild(div);
+  });
+}
+
+/* ============================================================
+   AUTO-DESAFIOS (localStorage)
+============================================================ */
+function loadCustomChallenges() {
+  try { return JSON.parse(localStorage.getItem('fc_custom') || '[]'); } catch { return []; }
+}
+
+function saveCustomChallenges(arr) {
+  localStorage.setItem('fc_custom', JSON.stringify(arr));
+}
+
+function renderCustomList() {
+  const arr = loadCustomChallenges();
+  const list = document.getElementById('custom-list');
+  const countEl = document.getElementById('custom-count');
+  countEl.textContent = `${arr.length} ${arr.length === 1 ? 'item' : 'itens'}`;
+  if (arr.length === 0) {
+    list.innerHTML = '<p class="text-muted text-center" style="padding:24px;">Nenhum auto-desafio criado ainda.</p>';
+    return;
+  }
+  list.innerHTML = '';
+  arr.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.className = 'custom-item';
+    const levelBadge = { easy: 'badge-easy', medium: 'badge-medium', hard: 'badge-hard' }[item.level] || 'badge-custom';
+    const levelLabel = { easy: 'Fácil', medium: 'Moderado', hard: 'Difícil' }[item.level] || item.level;
+    div.innerHTML = `
+      <div class="custom-item-body">
+        <div class="custom-item-title">${item.title}</div>
+        <div class="custom-item-desc">${item.desc}</div>
+        <div style="display:flex; gap:8px; margin-top:8px; align-items:center;">
+          <span class="badge ${levelBadge}">${levelLabel}</span>
+          <span class="badge badge-custom">${item.area}</span>
+          <span class="text-muted" style="font-size:0.75rem;">⏱ ${item.time} min</span>
+        </div>
+      </div>
+      <button class="btn btn-sm btn-danger" data-idx="${idx}">🗑</button>
+    `;
+    div.querySelector('button').addEventListener('click', (e) => {
+      e.stopPropagation();
+      const arr2 = loadCustomChallenges();
+      arr2.splice(idx, 1);
+      saveCustomChallenges(arr2);
+      renderCustomList();
+      toast('Auto-desafio removido.', 'warn');
+    });
+    list.appendChild(div);
+  });
+}
+
+function saveNewCustom() {
+  const title = document.getElementById('cc-title').value.trim();
+  const desc  = document.getElementById('cc-desc').value.trim();
+  const level = document.getElementById('cc-level').value;
+  const time  = parseInt(document.getElementById('cc-time').value) || 15;
+  const area  = document.getElementById('cc-area').value;
+  if (!title) { toast('Insira um título para o desafio.', 'warn'); return; }
+  const arr = loadCustomChallenges();
+  arr.unshift({ title, desc, level, time, area, createdAt: Date.now() });
+  saveCustomChallenges(arr);
+  document.getElementById('cc-title').value = '';
+  document.getElementById('cc-desc').value = '';
+  renderCustomList();
+  toast('Auto-desafio salvo!', 'success');
+}
+
+/* ============================================================
+   ESTATÍSTICAS
+============================================================ */
+function loadStats() {
+  try { return JSON.parse(localStorage.getItem('fc_stats') || '{}'); } catch { return {}; }
+}
+
+function saveStats(s) { localStorage.setItem('fc_stats', JSON.stringify(s)); }
+
+function updateStats(key, delta) {
+  const s = loadStats();
+  s[key] = (s[key] || 0) + delta;
+  saveStats(s);
+  renderStats();
+}
+
+function renderStats() {
+  const s = loadStats();
+  const completed = loadCompletedChallenges();
+  const custom = loadCustomChallenges();
+  const data = [
+    { val: s.sessions || 0,        label: 'Sessões Pomodoro' },
+    { val: s.focus_minutes || 0,   label: 'Minutos de Foco' },
+    { val: completed.length,        label: 'Desafios Concluídos' },
+    { val: custom.length,           label: 'Auto-desafios' },
+    { val: s.challenges_done || 0, label: 'Conclusões Totais' },
+  ];
+  const grid = document.getElementById('stats-grid');
+  grid.innerHTML = '';
+  data.forEach(d => {
+    const div = document.createElement('div');
+    div.className = 'stat-block';
+    div.innerHTML = `<div class="stat-val">${d.val}</div><div class="stat-label">${d.label}</div>`;
+    grid.appendChild(div);
+  });
+}
+
+/* ============================================================
+   MODO FOCO
+============================================================ */
+let focusModeActive = false;
+
+function toggleFocusMode() {
+  focusModeActive = !focusModeActive;
+  const overlay = document.getElementById('focus-overlay');
+  const indicator = document.getElementById('focus-indicator');
+  if (focusModeActive) {
+    overlay.classList.add('active');
+    indicator.classList.add('on');
+    const task = document.getElementById('timer-task').value.trim();
+    document.getElementById('focus-task-display').textContent =
+      task || 'Concentre-se. Uma tarefa por vez.';
+  } else {
+    overlay.classList.remove('active');
+    indicator.classList.remove('on');
+  }
+}
+
+/* ============================================================
+   TOAST
+============================================================ */
+function toast(msg, type = 'info') {
+  const tc = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type === 'success' ? 'success' : type === 'warn' ? 'warn' : type === 'danger' ? 'danger' : ''}`;
+  t.textContent = msg;
+  tc.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+/* ============================================================
+   NAVEGAÇÃO
+============================================================ */
+function navigate(viewId) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(viewId).classList.add('active');
+  document.querySelector(`.nav-btn[data-view="${viewId}"]`).classList.add('active');
+
+  if (viewId === 'view-stats') renderStats();
+  if (viewId === 'view-motivation') { showRandomQuote(); renderAllQuotes(); }
+  if (viewId === 'view-custom') renderCustomList();
+  if (viewId === 'view-challenges') renderChallenges();
+}
+
+/* ============================================================
+   INICIALIZAÇÃO
+============================================================ */
+function init() {
+  // Navegação
+  document.querySelectorAll('.nav-btn[data-view]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      navigate(btn.dataset.view);
+      if (window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.remove('open');
+      }
+    });
+  });
+
+  // Timer
+  initTimer();
+
+  document.getElementById('btn-timer-start').addEventListener('click', startTimer);
+  document.getElementById('btn-timer-reset').addEventListener('click', resetTimer);
+  document.getElementById('btn-timer-skip').addEventListener('click', advancePhase);
+
+  document.querySelectorAll('.timer-adj-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cfg = btn.dataset.cfg;
+      const dir = parseInt(btn.dataset.dir);
+      const mins = { focus: 'focus', short: 'short', long: 'long' }[cfg];
+      TimerState.config[mins] = Math.max(1, Math.min(120, TimerState.config[mins] + dir));
+      document.getElementById(`cfg-${cfg}-val`).textContent = TimerState.config[mins];
+      if (!TimerState.running && TimerState.phase === cfg) {
+        TimerState.totalForPhase = timerMinutes(mins);
+        TimerState.remaining = TimerState.totalForPhase;
+        renderTimerDisplay();
+        updateTimerRing();
+      }
+    });
+  });
+
+  // Sons
+  renderSounds();
+
+  document.getElementById('master-volume').addEventListener('input', (e) => {
+    const v = e.target.value / 100;
+    if (masterGain) masterGain.gain.value = v;
+    document.getElementById('vol-pct').textContent = `${e.target.value}%`;
+  });
+
+  // Desafios
+  renderChallenges();
+
+  document.querySelectorAll('.tab-btn[data-filter]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn[data-filter]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      challengeFilter = btn.dataset.filter;
+      renderChallenges();
+    });
+  });
+
+  document.getElementById('btn-reset-challenges').addEventListener('click', () => {
+    if (confirm('Tem certeza? Todo o progresso de desafios será reiniciado.')) {
+      localStorage.removeItem('fc_completed');
+      renderChallenges();
+      toast('Progresso reiniciado.', 'warn');
+    }
+  });
+
+  // Motivação
+  document.getElementById('btn-new-quote').addEventListener('click', showRandomQuote);
+  showRandomQuote();
+
+  // Auto-desafios
+  document.getElementById('btn-save-custom').addEventListener('click', saveNewCustom);
+
+  // Modo foco
+  document.getElementById('btn-toggle-focus-mode').addEventListener('click', toggleFocusMode);
+  document.getElementById('btn-exit-focus').addEventListener('click', toggleFocusMode);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && focusModeActive) toggleFocusMode();
+  });
+
+  // Reset stats
+  document.getElementById('btn-reset-stats').addEventListener('click', () => {
+    if (confirm('Zerar todas as estatísticas de progresso?')) {
+      localStorage.removeItem('fc_stats');
+      renderStats();
+      toast('Estatísticas zeradas.', 'warn');
+    }
+  });
+
+  // Mobile menu
+  const menuBtn = document.getElementById('btn-menu-mobile');
+  if (window.innerWidth <= 768) menuBtn.style.display = 'flex';
+  menuBtn.addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('open');
+  });
+
+  window.addEventListener('resize', () => {
+    menuBtn.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
+  });
+
+  renderStats();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
