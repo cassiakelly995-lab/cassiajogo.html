@@ -625,6 +625,10 @@ document.querySelectorAll('.nav-btn[data-view]').forEach(btn => {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById(btn.dataset.view).classList.add('active');
+    if(btn.dataset.view === 'view-games') {
+      document.getElementById('games-hub-card').style.display='';
+      document.querySelectorAll('.game-area').forEach(a=>a.classList.remove('active'));
+    }
   });
 });
 
@@ -1040,12 +1044,21 @@ document.getElementById('btn-save-intention').addEventListener('click',()=>{
 // ═══════════════════════════════════════════════════════════════
 // GAME NAVIGATION
 // ═══════════════════════════════════════════════════════════════
+function activateView(viewId) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelector('.nav-btn[data-view="'+viewId+'"]').classList.add('active');
+  document.getElementById(viewId).classList.add('active');
+}
 function showGameHub(){
-  document.getElementById('games-hub-card').classList.remove('hidden');
+  activateView('view-games');
+  document.getElementById('games-hub-card').style.display='';
   document.querySelectorAll('.game-area').forEach(a=>a.classList.remove('active'));
 }
 function showGame(id){
-  document.getElementById('games-hub-card').classList.add('hidden');
+  activateView('view-games');
+  document.getElementById('games-hub-card').style.display='none';
+  document.querySelectorAll('.game-area').forEach(a=>a.classList.remove('active'));
   document.getElementById('game-'+id).classList.add('active');
   stats.gamesPlayed++;saveStats();renderStats();
 }
